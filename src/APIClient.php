@@ -11,9 +11,9 @@ class APIClient
 {
     protected const BASE_URL = "https://api.smartsheet.com/2.0/";
 
-    protected GuzzleClient $guzzleClient;
+    protected $guzzleClient;
 
-    protected string $token;
+    protected $token;
 
     /**
      * Configure API Client

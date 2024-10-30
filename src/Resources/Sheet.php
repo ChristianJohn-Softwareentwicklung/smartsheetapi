@@ -8,18 +8,18 @@ use Illuminate\Support\Collection;
 
 class Sheet extends Resource
 {
-    protected SmartsheetClient $client;
+    protected $client;
 
-    protected string $id;
-    protected string $name;
-    protected string $version;
-    protected bool $hasSummaryFields;
-    protected string $permalink;
-    protected string $createdAt;
-    protected string $modifiedAt;
-    protected bool $isMultiPickListEnabled;
-    protected array $columns;
-    protected array $rows;
+    protected  $id;
+    protected  $name;
+    protected  $version;
+    protected  $hasSummaryFields;
+    protected  $permalink;
+    protected  $createdAt;
+    protected  $modifiedAt;
+    protected  $isMultiPickListEnabled;
+    protected  $columns;
+    protected  $rows;
 
     public function __construct(SmartsheetClient $client, array $data)
     {
@@ -106,7 +106,6 @@ class Sheet extends Resource
         if (is_null($column)) {
             throw new Exception('Unable to find column with the name: ' . $title);
         }
-
         return $column->id;
     }
 
@@ -277,6 +276,56 @@ class Sheet extends Resource
             $this->addRows([$cells]);
         }
     }
+    
+    /**
+     * Function to insert or update rows to a smartshet.
+     * @param array $associativeRows
+     * @return bool
+     */
+    public function insertOrUpdateRows(array $associativeRows){
+        $rowsToUpdate = [];
+        $rowsToAdd = [];
+        // Get primary Column to get for update and name to compare
+        // id, index, title
+        if(!($primaryColumn = $this->getPrimaryColumn())){
+            return false;
+        }
+        
+        // Walk through all given rows to check for update or adding processing
+        foreach($associativeRows as $sourceRow){
+            // get primary value of source row
+            $rowFound = false;
+            if(!empty($sourceRow[$primaryColumn->title])){
+                $primaryValue = $sourceRow[$primaryColumn->title];
+            }else{
+                // if no primary value given, leave row
+                continue;
+            }
+            
+            // compare with actual rows 
+            foreach($this->getRows() as $row){
+                // if we found a matching primary column row value, we have to update
+                if($row->getCell($primaryColumn->title)->getValue() == $primaryValue){
+                    $rowsToUpdate[$row->getId()] = $sourceRow;
+                    $rowFound = true;
+                }
+            }
+            // if we not found a matching primary column value in all rows, we have to add the new row
+            if($rowFound !== true){
+                $rowsToAdd[] = $sourceRow;
+            }
+        }
+
+        // Update rows
+        $resultUpdate = $this->updateRows($rowsToUpdate);
+        // Add new rows
+        $resultAdd = $this->addRows($rowsToAdd);
+        return ["updateresult"=>$resultUpdate->message,
+                "updateresultcode"=>$resultUpdate->resultCode,
+                "addresult"=>$resultAdd->message,
+                "addresultcode"=>$resultAdd->resultCode
+            ];
+    }
 
     /**
      * Adds a row to the sheet
@@ -320,7 +369,7 @@ class Sheet extends Resource
     public function shareSheet(array $shares)
     {
         return $this->client->post("sheets/$this->id/shares", [
-            'json' => [...$shares]
+            'json' => $shares
         ]);
     }
 
@@ -342,6 +391,16 @@ class Sheet extends Resource
         return $this->columns;
     }
 
+    // Function to retrieve primary column
+    public function getPrimaryColumn() {
+        foreach($this->columns as $column){
+            if($column->primary == 1){
+                return $column;
+            }
+        }
+        return false;
+    }
+    
     public function addColumn(array $column)
     {
         return $this->addColumns([$column]);
@@ -364,7 +423,7 @@ class Sheet extends Resource
             ]
         ];
         return $this->client->post("sheets/$this->id/summary/fields", 
-            ['json' => [...$options]]
+            ['json' => $options]
         );
     }
 
@@ -384,14 +443,20 @@ class Sheet extends Resource
     public function updateSummaryFields(array $summaryFields)
     {
         return $this->client->put("sheets/$this->id/summary/fields", 
-            ['json' => [...$summaryFields]]
+            ['json' => $summaryFields]
         );
     }
 
     public function getSummaryFieldByName(String $fieldName)
     {
         return collect($this->getSummaryFields()->fields)
-            ->first(fn ($field) => $field->title == $fieldName);
+            ->first(
+                    function($field) use ($fieldName) {
+                        return $field->title == $fieldName;
+                    }                    
+                    
+                    
+                    );
     }
 
     public function getSummaryFields()

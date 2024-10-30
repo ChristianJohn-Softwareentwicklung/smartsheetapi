@@ -15,11 +15,11 @@ const DEFAULT_COLUMNS = [
 
 class Workspace extends Resource
 {
-    protected SmartsheetClient $client;
+    protected $client;
 
-    protected string $id;
-    protected string $name;
-    protected array $sheets = [];
+    protected $id;
+    protected $name;
+    protected $sheets = [];
 
     /**
      * Workspace constructor.

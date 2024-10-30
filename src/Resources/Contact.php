@@ -6,9 +6,9 @@ use Smartsheet\SmartsheetClient;
 
 class Contact extends Resource
 {
-    protected SmartsheetClient $client;
+    protected $client;
 
-    protected string $id, $name, $email;
+    protected $id, $name, $email;
 
     public function __construct(SmartsheetClient $client, array $data)
     {

@@ -6,12 +6,12 @@ use Smartsheet\SmartsheetClient;
 
 class Cell extends Resource
 {
-    protected SmartsheetClient $client;
+    protected  $client;
 
-    protected string $columnId;
-    protected string $value;
-    protected string $displayValue;
-    protected string $formula;
+    protected  $columnId;
+    protected  $value;
+    protected  $displayValue;
+    protected  $formula;
 
     public function __construct(SmartsheetClient $client, array $data)
     {

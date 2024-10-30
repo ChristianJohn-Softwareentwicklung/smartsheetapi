@@ -7,12 +7,12 @@ use Smartsheet\SmartsheetClient;
 
 class Folder extends Resource
 {
-    protected SmartsheetClient $client;
+    protected $client;
 
-    protected string $id;
-    protected string $name;
-    protected string $permaLink;
-    protected array $sheets = [];
+    protected $id;
+    protected $name;
+    protected $permaLink;
+    protected $sheets = [];
 
     public function __construct(SmartsheetClient $client, array $data)
     {

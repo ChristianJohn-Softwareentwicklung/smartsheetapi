@@ -4,7 +4,7 @@ namespace Smartsheet\Resources;
 
 class Resource
 {
-    protected array $data;
+    protected $data;
 
     public function __construct(array $data = [])
     {

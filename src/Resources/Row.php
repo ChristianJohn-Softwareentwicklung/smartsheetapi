@@ -8,14 +8,14 @@ use Illuminate\Support\Collection;
 
 class Row extends Resource
 {
-    protected SmartsheetClient $client;
+    protected $client;
 
-    protected string $id;
-    protected string $sheetId;
-    protected int $rowNumber;
-    protected array $cells;
+    protected $id;
+    protected $sheetId;
+    protected $rowNumber;
+    protected $cells;
 
-    protected Sheet $sheet;
+    protected $sheet;
 
     public function __construct(SmartsheetClient $client, array $data, Sheet $sheet = null)
     {
@@ -38,6 +38,7 @@ class Row extends Resource
 
     public function getCell(string $columnName)
     {
+
         return $this->getCells()->first(function ($cell) use ($columnName) {
             return $cell->getColumnId() == $this->sheet->getColumnId($columnName);
         });
